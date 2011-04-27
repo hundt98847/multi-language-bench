@@ -1,0 +1,135 @@
+%-----------------------------------------------------------------------------
+%
+%               Template for sigplanconf LaTeX Class
+%
+% Name:         sigplanconf-template.tex
+%
+% Purpose:      A template for sigplanconf.cls, which is a LaTeX 2e class
+%               file for SIGPLAN conference proceedings.
+%
+% Author:       Paul C. Anagnostopoulos
+%               Windfall Software
+%               978 371-2316
+%               paul@windfall.com
+%
+% Created:      15 February 2005
+%
+%-----------------------------------------------------------------------------
+
+\newif\ifieee
+\ieeetrue
+\newif\ifsubmit
+\submittrue
+% \submitfalse
+
+%\documentclass[natbib,10pt,preprint]{sigplanconf}
+\documentclass[10pt,conference]{IEEEtran}
+%\documentclass[10pt,conference]{sigplanconf}
+
+% The following \documentclass options may be useful:
+%
+% 10pt          To set in 10-point type instead of 9-point.
+% 11pt          To set in 11-point type instead of 9-point.
+% authoryear    To obtain author/year citation style instead of numeric.
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{fixltx2e}
+\usepackage{fancyvrb}
+\usepackage{subfigure}
+\usepackage{hyphenat}
+\usepackage{url}
+%\usepackage[noadjust]{cite}
+
+% squeeze more paper in - increase this value
+\addtolength{\textwidth}{0.0in}
+
+\begin{document}
+
+\ifieee
+\else
+\conferenceinfo{Scala Days '11}{Stanford, CA} 
+\copyrightyear{2011} 
+\copyrightdata{[to be supplied]} 
+\fi
+
+%\titlebanner{Submitted to CGO '11 for confidential anonymous review} % These are ignored unless
+%\preprintfooter{MAO - an Extensible Micro-Architectural Optimizer}   % 'preprint' option specified.
+
+\title{Loop Recognition in C++/Java/Go/Scala}
+%\subtitle{Subtitle Text, if any}
+
+\ifsubmit 
+\ifieee
+\author{\IEEEauthorblockN{Robert~Hundt}
+        \IEEEauthorblockA{
+                          Google \\
+                          1600 Amphitheatre Parkway \\
+                          Mountain View, CA, 94043 \\
+                          rhundt@google.com
+                          }
+       }
+
+\else
+\authorinfo{Robert Hundt}
+           {Google\par
+            1600 Amphitheatre Parkway\par
+            Mountain View, CA, 94043
+            }
+           {rhundt@google.com}
+\fi
+\else
+\authorinfo{}{}{}
+\fi
+\maketitle
+\begin{abstract}
+In this experience report we encode a well specified, compact
+benchmark in four programming languages, namely C++, Java, Go, and
+Scala.  The implementations each use the languages' idiomatic
+container classes, looping constructs, and memory/object allocation
+schemes. It does not attempt to exploit specific language and run-time
+features to achieve maximum performance.  This approach allows an
+almost fair comparison of language features, code complexity,
+compilers and compile time, binary sizes, run-times, and memory
+footprint.
+ 
+While the benchmark itself is simple and compact, it employs many
+language features, in particular, higher-level data structures (lists,
+maps, lists and arrays of sets and lists), a few algorithms
+(union/find, dfs / deep recursion, and loop recognition based on
+Tarjan), iterations over collection types, some object oriented
+features, and interesting memory allocation patterns.  We do not
+explore any aspects of multi-threading, or higher level type
+mechanisms, which vary greatly between the languages.
+
+The benchmark points to very large differences in all examined
+dimensions of the language implementations. After publication of the
+benchmark internally at Google, several engineers produced highly
+optimized versions of the benchmark. We describe many of the performed
+optimizations, which were mostly targeting run-time performance and code
+complexity. While this effort is an anecdotal comparison only,
+the benchmark, and the subsequent tuning efforts, are indicative of
+typical performance pain points in the respective languages.
+
+\end{abstract}
+
+\ifieee
+\else
+\category{D.3.4}{Processors}{Compilers}
+\category{D.3.4}{Processors}{Optimization}
+
+\terms
+Performance
+
+\keywords
+Optimization, Performance
+\fi
+
+% Paper
+\input{intro}
+\input{bench}
+
+\bibliographystyle{acm}
+\bibliography{main}
+
+\end{document}
