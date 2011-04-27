@@ -1,0 +1,542 @@
+\section{Performance Analysis}
+\label{benchmark}
+
+The benchmark consists of a driver for the loop recognition
+functionality. This driver constructs a very simple control flow
+graph, a diamond of 4 nodes with a backedge from the bottom to the
+top node, and performs loop recognition on it for 15.000 times. 
+The purpose is to force Java/Scala compilation, so that the benchmark 
+itself can be measured on compiled code. 
+
+Then the driver constructs a
+large control flow graph containing 4-deep loop nests with a total of
+76000 loops. It performs loop recognition on this graph for 50
+times. The driver codes for all languages are identical.
+
+As a result of this benchmark design, the Scala and Java measurements
+contain a small fraction of interpreter time. However, this fraction
+is very small and run-time results presented later should be
+taken as ``order of magnitude'' statements only.
+
+The benchmarking itself was done in a simple and fairly 
+un-scientific fashion. The benchmarks were run 3 times and
+the median values are reported. 
+All of the experiments are done on an older Pentium IV workstation.
+Run-times were measured using wall-clock time.
+We analyze the benchmarks along the dimensions code size, compile time, binary
+size, memory footprint, and run-time.
+
+\subsection{Code Size}
+
+The benchmark implementations contain similar comments in all codes,
+with a few minor exceptions. Therefore, to compare code size, a simple
+Linux {\tt wc} is performed on the benchmarking code and the main algorithm
+code together, counting lines. The results are shown in Figure \ref{codesize}.
+Code is an important factor in
+program comprehension. Studies have shown that the average time to
+recognize a token in code is a constant for individual programmers. As
+a result, less tokens means goodness. Note that the Scala and Go
+versions are significantly more compact than the verbose C++ and Java versions.
+
+\begin{figure}
+\begin{tabular}{|l|r|r|} \hline
+ Benchmark	&wc -l	& Factor  \\ \hline\hline
+ C++ Dbg/Opt	&850    & 1.3x	  \\ \hline
+ Java 	        &1068	& 1.6x	  \\ \hline
+ Java Pro       &1240	& 1.9x	  \\ \hline
+ Scala	        &658	& 1.0x	  \\ \hline
+ Scala Pro      &297	& 0.5x	  \\ \hline
+ Go	        &902	& 1.4x	  \\ \hline
+ Go Pro	        &786	& 1.2x	  \\ \hline
+\end{tabular}
+\caption{Code Size in $[$Lines of Code$]$, normalized to the Scala version}
+\label{codesize}
+\end{figure}
+
+\subsection{Compile Times}
+
+In Figure \ref{compiletime} we compare the static compile times for
+the various languages. Note that Java/Scala only compile to
+Java Byte Code. For Scala, the {\tt scalac} compiler is evaluated,
+as well as the memory resident {\tt fsc} compiler, which avoids
+re-loading of the compiler on every invocation. This benchmark
+is very small in terms of lines of code, and unsurprisingly,
+{\tt fsc} is about 3-4x faster than {\tt scalac}.
+
+\begin{figure}
+\begin{tabular}{|l|r|r|} \hline
+ Benchmark    & Compile Time       & Factor \\ \hline\hline
+ C++ Dbg      &      3.9           &  6.5x \\ \hline
+ C++ Opt      &      3.0           &  5.0x \\ \hline
+ Java         &      3.1           &  5.2x \\ \hline
+ Java Pro     &      3.0           &  5.0x \\ \hline
+ Scala scalac &     13.9           & 23.1x \\ \hline
+ Scala fsc    &      3.8           &  6.3x \\ \hline
+ Scala Pro scalac & 11.3           & 18.8x \\ \hline
+ Scala Pro fsc    &  3.5           &  5.8x \\ \hline
+ Go           &      1.2           &  2.0x \\ \hline
+ Go Pro       &      0.6           &  1.0x \\ \hline
+\end{tabular}
+\caption{Compilation Times in $[$Secs$]$, normalized to the Go Pro version}
+\label{compiletime}
+\end{figure}
+
+
+\subsection{Binary Sizes}
+
+In Figure \ref{binsize} we compare the statically compiled binary
+sizes, which may contain debug information, and JAR file sizes. Since
+much of the run-time is not contained in Java JAR files, they are
+expected to be much smaller in size and used as baseline.  It should
+also be noted that for large binaries, plain binary size matters a
+lot, as in distributed build systems, the generated binaries need to
+be transferred from the build machines, which can be bandwidth limited and
+slow.
+
+\begin{figure}
+\begin{tabular}{|l|r|r|} \hline
+ Benchmark   & Binary or Jar [Byte] & Factor \\ \hline\hline
+ C++ Dbg     &    592892           &   45x \\ \hline
+ C++ Opt     &     41507           &  3.1x \\ \hline
+ Java        &     13215           &  1.0x \\ \hline
+ Java Pro    &     21047           &  1.6x \\ \hline
+ Scala       &     48183           &  3.6x \\ \hline
+ Scala Pro   &     36863           &  2.8x \\ \hline
+ Go          &   1249101           &   94x \\ \hline
+ Go Pro      &   1212100           &   92x \\ \hline
+\end{tabular}
+\caption{Binary and JAR File Sizes in $[$Byte$]$, normalized to the Java version}
+\label{binsize}
+\end{figure}
+
+
+\subsection{Memory Footprint}
+
+To estimate memory footprint, the benchmarks were run alongside
+the Unix {\tt top} utility and memory values were manually
+read out in the middle of the benchmark run.
+The numbers are fairly stable across the benchmark
+run-time. The first number in the table below 
+represents potentially pre-allocated, but un-touched
+virtual memory. The second number (Real) represents real memory used.
+
+\begin{figure}
+\begin{tabular}{|l|r|r|r|r|} \hline
+ Benchmark	& Virt &Real &   Factor Virt  & Factor Real \\ \hline\hline
+ C++ Opt	& 184m &163m & 	 1.0	      & 1.0 \\ \hline
+ C++ Dbg	& 474m &452m & 	 2.6-3.0      & 2.8 \\ \hline
+ Java	        &1109m &617m & 	 6.0	      & 3.7 \\ \hline
+ Scala          &1111m &293m &   6.0	      & 1.8 \\ \hline
+ Go	        &16.2g &501m & 	 90	      & 3.1 \\ \hline
+\end{tabular}
+\caption{Memory Footprint, normalized to the C++ version}
+\label{codesize}
+\end{figure}
+
+\subsection{Run-time Measurements}
+
+It should be noted that this benchmark is designed to amplify language
+implementations' negative properties. There is lots of memory
+traversal, so minimal footprint is beneficial. There is recursion, so
+small stack frames are beneficial. There are lots of array accesses,
+so array bounds checking will be negative. There are many objects
+created and destroyed - this could be good or bad for the garbage
+collector. As shown, GC settings have huge impact on
+performance. There are many pointers used and null-pointer checking
+could be an issue. For Go, some key data structures are part of the
+language, others are not. The results are summarized in Figure \ref{runtime}.
+
+\begin{figure}
+\begin{tabular}{|l|r|r|} \hline
+ Benchmark   & Time [sec] &	 Factor  \\ \hline\hline
+ C++ Opt	& 23 	  & 1.0x \\ \hline
+ C++ Dbg	&197 	  & 8.6x \\ \hline
+ Java 64-bit	& 134 	  & 5.8x \\ \hline
+ Java 32-bit	& 290	  &12.6x \\ \hline
+ Java 32-bit GC* & 106	  &4.6x \\ \hline
+ Java 32-bit SPEC GC & 89 &	 3.7x \\ \hline
+ Scala 	             & 82 &	 3.6x \\ \hline
+ Scala low-level*    & 67 &	 2.9x \\ \hline
+ Scala low-level GC* & 58 &	 2.5x \\ \hline
+ Go 6g	             & 161 & 	 7.0x \\ \hline
+ Go Pro*	     & 126 &	 5.5x \\ \hline
+\end{tabular}
+
+\caption{Run-time measurements. Scala low-level is explained below, it
+  has a hot for-comprehension replaced with a simple {\tt
+    foreach()}. Go Pro is the version that has all accessor functions
+  removed, as well as all lists. The Scala and Java GC versions use
+  optimized garbage collection settings, explained below. The Java
+  SPEC GC version uses a combination of the SPECjbb settings and
+  -XX:+CycleTime }
+
+\label{runtime}
+\end{figure}
+
+
+
+%---------------------------------------------------------------------
+
+\section{Tunings}
+\label{tuning}
+
+Note again that the original intent of this language comparison was to
+provide generic and straightforward implementations of a well
+specified algorithm, using the default language containers and looping
+idioms. Of course, this approach
+also led to sub-optimal performance. 
+
+After publication of this benchmark internally to Google, several
+engineers signed up and created highly optimized versions of the program,
+some of them without keeping the original program structure intact. 
+
+As these tuning efforts might be indicative to the problems
+performance engineers face every day with the languages, the following
+sections contain a couple of key manual optimization techniques and
+tunings for the various languages.
+
+\subsection{Scala/Java Garbage Collection}
+
+The comparison between Java and Scala is interesting. Looking at
+profiles, Java shows a large GC component, but good code performance
+
+\begin{footnotesize}
+\begin{verbatim}
+100.0% 14073             Received ticks
+ 74.5% 10484             Received GC ticks
+  0.8%   110             Compilation
+  0.0%     2             Other VM operations
+\end{verbatim}
+\end{footnotesize}
+
+Scala has this breakdown between GC and compiled code:
+
+\begin{footnotesize}
+\begin{verbatim}
+100.0%  7699             Received ticks
+ 31.4%  2416             Received GC ticks
+  4.8%   370             Compilation
+  0.0%     1             Class loader
+\end{verbatim}
+\end{footnotesize}
+
+In other words, Scala spends 7699-2416-1 = 5282 clicks on non-GC
+code. Java spends 14073-10484-110-2 = 3477 clicks on non-GC
+code. Since GC has other negative performance side-effects, one could
+estimate that without the GC anomaly, Java would be about
+roughly 30\% faster than Scala.
+
+
+\subsection{Eliminating For-Comprehension}
+
+Scala shows a high number of samples in several {\tt apply()}
+functions.  Scala has 1st-class functions and anonymous functions -
+the for-comprehension in the DFS routine can be rewritten from:
+
+\begin{footnotesize}
+\begin{verbatim}
+    for (target <- currentNode.outEdges
+         if (number(target) == UNVISITED)) {
+           lastid = DFS(target, nodes, number, 
+                        last, lastid + 1)
+         }
+\end{verbatim}
+\end{footnotesize}
+
+to:
+
+\begin{footnotesize}
+\begin{verbatim}
+    currentNode.outEdges.foreach(target => 
+           if (number(target) == UNVISITED) {    
+             lastid = DFS(target, nodes, number, 
+                          last, lastid + 1)
+           }
+         )
+\end{verbatim}
+\end{footnotesize}
+
+This change alone shaves off about 15secs of run-time, or about 20\%
+(slow run-time / fast run-time). This is marked as Scala Low-Level in
+Figure \ref{runtime}. In other words, while for-comprehensions are
+supremely elegant, a better compiler should have found this opportunity
+without user intervention.
+
+Note that Java also creates a temporary object for foreach loops on
+loop entry. Jeremy Manson found that this was one of the main causes
+of the high GC overhead for the Java version and changed the 
+Java {\tt forall} loops to explicit {\tt while} loops.
+
+
+\subsection{Tuning Garbage Collection}
+
+Originally the Java and Scala benchmarks were run with 64-bit Java,
+using {\tt -XX:+UseCompressedOops}, hoping to get the benefits of
+64-bit code generation, without incurring the memory penalties of
+larger pointers. Run-time is 134 secs, as shown in above table.
+
+To verify the assumptions about 64/32 bit java, the benchmark was run
+with a 32-bit Java JVM, resulting in run-time of 290 secs, or a 2x
+slowdown over the 64-bit version. To evaluate the impact of garbage
+collection further, the author picked the GC settings from a major
+Google application component which is written in Java. Most notably,
+it uses the concurrent garbage collector.
+
+Running the benchmark with these options results in run-time of 106
+secs, or a 3x improvement over the default 32-bit GC settings, and a
+25\% improvement over the 64-bit version.
+
+Running the 64-bit version with these new GC settings, run-time was 123 secs, a 
+further roughly 10\% improvement over the default settings.
+
+Chris Ruemmler suggested to evaluate the SPEC JBB settings as
+well. With these settings, run-time for 32-bit Java reduced to 93 secs,
+or another 12\% faster. Trying out various combinations of the options
+seemed to indicate that these settings were highly tuned to the SPEC
+benchmarks.
+
+After some discussions, Jeremy Manson suggested to combine the SPEC
+settings with {\tt -XX:+CycleTime}, resulting in the fasted execution
+time of 89 seconds for 32-bit Java, or about 16\% faster than the
+fastest settings used by the major Google application. These results
+are included in above table as Java 32-bit SPEC GC.
+
+Finally, testing the Scala-fixed version with the Google application
+GC options (32-bit, and specialized GC settings), performance improved
+from 67 secs to 58 secs, representing another 13\% improvement.
+
+What these experiments and their very large performance
+impacts show is that tuning GC has a disproportionate high
+effect on benchmark run-times.
+
+
+\subsection{C++ Tunings}
+
+Several Google engineers contributed performance enhancements to
+the C++ version. We present most changes via citing from the
+engineers' change lists.
+
+Radu Cornea found that the C++ implementation can be improved by using
+hash\_maps instead of maps. He got a 30\% improvement
+
+Steinar Gunderson found that the C++ implementation can be improved by
+using {\tt empty()} instead of {\tt size() $>$ 0} to check whether a list
+contains something. This didn't produce a performance benefit - but is
+certainly the right thing to do, as {\tt list.size()} is $O(n)$ and
+{\tt list.empty()} is $O(1)$.
+
+Doug Rhode created a greatly improved version, which improved
+performance by 3x to 5x. This version will be kept in the {\tt
+  havlak\_cpp\_pro directory}. At the time
+of this writing, the code was heavily dependent on several
+Google internal data structures and could not be open sourced. However, his list of change comments is very instructional:
+
+{\em 30.4\%}  Changing {\tt BasicBlockMap} from {\tt map$<$BasicBlock*, int$>$} to {\tt hash\_map} \\
+{\em 12.1\%}  Additional gain for changing it to {\tt hash\_map$<$int, int$>$} using the  BasicBlock's {\tt name()} as the key. \\
+{\em  2.1\%}  Additional gain for pre-sizing {\tt BasicBlockMap}. \\
+{\em 10.8\%}  Additional gain for getting rid of {\tt BasicBlockMap} and storing {\tt dfs\_numbers} on the BasicBlocks themselves. \\
+{\em  7.8\%}  Created a {\tt TinySet} class based on {\tt InlinedVector$<>$} to replace {\tt set$<>$} for {\tt non\_back\_preds}. \\
+{\em  1.9\%}  Converted {\tt BasicBlockSet} from {\tt set$<>$} to {\tt vector$<>$}. \\
+{\em  3.2\%}  Additional gain for changing {\tt BasicBlockSet} from {\tt vector$<>$} to {\tt InlinedVector$<>$}. \\
+{\em  2.6\%}  Changed {\tt node\_pool} from a {\tt list$<>$} to a {\tt vector$<>$}.  Moved definition  out of the loop to recycle it. \\
+{\em  1.9\%}  Change worklist from a {\tt list$<>$} to a {\tt deque$<>$}. \\
+{\em  2.2\%}  Changed LoopSet from {\tt set$<>$} to {\tt vector$<>$}. \\
+{\em  1.1\%}  Changed LoopList from {\tt list$<>$} to {\tt vector$<>$}. \\
+{\em  1.1\%}  Changed EdgeList from {\tt list$<$BasicBlockEdge*$>$} to {\tt vector$<$BasicBlockEdge$>$}. \\
+{\em  1.2\%}  Changed from using int for the node dfs numbers to a logical {\tt IntType$<$uint32$>$ NodeNum}, mainly to clean up the code, but unsigned  array indexes are faster. \\
+{\em  0.4\%}  Got rid of parallel vectors and added more fields to {\tt UnionFindNode}. \\
+{\em  0.2\%}  Stack allocated LoopStructureGraph in one loop. \\
+{\em  0.2\%}  Avoided some UnionFindNode copying when assigning local vars. \\
+{\em  0.1\%}  Rewrote path compression to use a double sweep instead of  caching nodes in a list.
+
+Finally, David Xinliang Li took this version, and applied a few more optimizations:
+
+{\em Structure Peeling}. The structure {\tt UnionFindNode} has 3
+  cold fields: {\tt type\_}, {\tt loop\_}, and {\tt header\_}.  Since nodes are allocated
+  in an array, this is a good candidate for peeling optimization.
+  The three fields can be peeled out into a separate array. Note the
+  {\tt header\_ field} is also dead -- but removing it has very little
+  performance impact.  The {\tt name\_} field in the {\tt BasicBlock} structure is also
+  dead, but it fits well in the padding space so it is not removed.
+
+{\em Structure Inlining}. In the {\tt BasicBlock} structure, vector is used
+  for incoming and outgoing edges -- making it an inline vector of 2
+  element remove the unnecessary memory indirection for most of the
+  cases, and improves locality.
+
+
+{\em Class object parameter passing and return}. In Doug Rhode's version,
+  {\tt NodeNum} is a {\tt typedef} of the {\tt IntType$<$...$>$}
+  class.  Although it has only one integer member, it has non trivial
+  copy constructor, which makes it to be of memory class instead of
+  integer class in the parameter passing conventions.  For both
+  parameter passing and return, the low level ABI requires them to be
+  stack memory, and C++ ABI requires that they are allocated in the
+  caller -- the first such aggregate's address is passed as the first
+  implicit parameter, and the rest aggregates are allocated in a
+  buffer pointed to by {\tt r8}. For small functions which are inlined, this
+  is not a big problem -- but DFS is a recursive function. The
+  downsides include unnecessary memory operation (passing/return
+  stack objects) and increased register pressure -- {\tt r8} and {\tt rdi} are
+  used.
+
+{\em Redundant this}. DFS's  {\tt this} parameter is never used -- it can be made a static member function
+
+\subsection{Java Tunings}
+
+Jeremy Manson brought the performance of Java on par with the original
+C++ version.  This version is kept in the {\tt java\_pro}
+directory. Note that Jeremy deliberately refused to optimize the code
+further, many of the C++ optimizations would apply to the Java version
+as well. The changes include:
+
+%\begin{small}
+\begin{itemize}
+
+\item Replaced {\tt HashSet} and {\tt ArrayList} with much smaller
+  equivalent data structures that don't do boxing or have large
+  backing data structures.
+
+\item Stopped using {\tt foreach} on {\tt ArrayLists}.  There is no
+  reason to do this it creates an extra object every time, and one can
+  just use direct indexing.
+
+\item Told the {\tt ArrayList} constructors to start out at size 2
+  instead of size 10.  For the last 10\% in performance, use a free
+  list for some commonly allocated objects.
+
+\end{itemize}
+%\end{small}
+
+
+\subsection{Scala Tunings}
+
+Daniel Mahler improved the Scala version by creating a more functional
+version, which is kept in the Scala Pro directories. This version is
+only 270 lines of code, about 25\% of the C++ version, and not only is
+it shorter, run-time also improved by about 3x. It should be noted
+that this version performs algorithmic improvements as well, and
+is therefore not directly comparable to the other {\em Pro} versions.
+In detail, the following changes were performed.
+
+The original Havlak algorithm specification keeps all node-related
+data in global data structures, which are indexed by integer node id's.
+Nodes are always referenced by id. Similar to the data
+layout optimizations in C++, this implementation introduces a {\tt
+  node} class which combines all node-specific information into a single
+class. Node objects are referenced and passed around in an
+object-oriented fashion, and accesses to global objects are no longer
+required
+
+Most collection were replaced by using {\tt ArrayBuffer}. This 
+data structure is Scala's equivalent of C++'s {\tt vector}.
+Most collections in the algorithm don't require any more advanced
+functionality than what this data structure offers.
+
+The main algorithmic change was to make the main 
+search control loop recursive.
+The original algorithm performs the search using an iterative loop
+and maintains an explicit 'worklist' of nodes to be searched.
+Transforming the search into more natural recursive style
+significantly simplified the algorithm implementation.
+
+A significant part of the original program is the specification of a
+complex test graph, which is written in a procedural style.  Because
+of this style, the structure of the test graph is not immediately evident.
+Scala made it possible to introduce a declarative DSL which is more
+concise and additionally makes the structure of the graph visible
+syntactically.
+It should be noted that similar changes could have been made in other
+languages, e.g., in C++ via nested constructor calls, but Scala's
+support for functional programming seemed to make this really easy
+and required little additional supporting code.
+
+For example, for the construction of the test graph, the 
+procedural C++ code shown in Figure \ref{cpp-graph} turns into 
+the more functional Scala code shown in Figure \ref{scala-graph}:
+
+\begin{figure}
+\begin{footnotesize}
+\begin{verbatim}
+  for (int parlooptrees = 0; parlooptrees < 10; 
+       parlooptrees++) {
+    cfg.CreateNode(n + 1);
+    buildConnect(&cfg, 2, n + 1);
+    n = n + 1;
+
+    for (int i = 0; i < 100; i++) {
+      int top = n;
+      n = buildStraight(&cfg, n, 1);
+      for (int j = 0; j < 25; j++) {
+        n = buildBaseLoop(&cfg, n);
+      }
+      int bottom = buildStraight(&cfg, n, 1);
+      buildConnect(&cfg, n, top);
+      n = bottom;
+    }
+    buildConnect(&cfg, n, 1);
+  }
+\end{verbatim}
+\end{footnotesize}
+\caption{C++ code to construct the test graph}
+\label{cpp-graph}
+\end{figure}
+
+\begin{figure}
+\begin{footnotesize}
+\begin{verbatim}
+(1 to 10).foreach(
+      _ => {
+        n2
+        .edge
+        .repeat(100,
+                _.back(_.edge
+                       .repeat(25,
+                               baseLoop(_)))
+                .edge)
+        .connect(n1)
+      })
+\end{verbatim}
+\end{footnotesize}
+\caption{Equivalent Scala code to construct the test graph}
+\label{scala-graph}
+\end{figure}
+
+
+\section{Conclusions}
+
+We implemented a well specified compact algorithm in four languages,
+C++, Java, Go, and Scala, and evaluated the results along several
+dimensions, finding factors of differences in all areas.
+We discussed many subsequent language specific
+optimizations that point to typical performance pain points in the
+respective languages.
+
+We find that in regards to performance, C++ wins out by a 
+large margin. However, it also required the most extensive
+tuning efforts, many of which were done at a level of
+sophistication that would not be available to the average
+programmer. 
+
+Scala concise notation and powerful language features
+allowed for the best optimization of code complexity.
+
+The Java version was probably the simplest to implement,
+but the hardest to analyze for performance. Specifically
+the effects around garbage collection were complicated
+and very hard to tune. Since Scala runs on the JVM, it has 
+the same issues.
+
+Go offers interesting language features, which also
+allow for a concise and standardized notation. The compilers
+for this language are still immature, which 
+reflects in both performance and binary sizes.
+
+\section{Acknowledgments}
+
+We would like to thank the many people commenting on the benchmark and
+the proposed methodology. We would like to single out the following
+individuals for their contributions: Jeremy Manson, Chris Ruemmler,
+Radu Cornea, Steinar H.~Gunderson, Doug Rhode, David Li, Rob Pike, Ian
+Lance Taylor, and Daniel Mahler. We furthermore thank the anonymous
+reviewers, their comments helped to improve this paper.
