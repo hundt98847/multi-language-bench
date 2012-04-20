@@ -22,7 +22,7 @@ COMPILER=./javac
 #
 JAVA=./java
 
-OPTS=-XX:+UseCompressedOops -server -Xss15500k
+OPTS= -server -Xss15500k
 
 LoopTesterApp.jar: LoopTesterApp.class
 	jar -cvf LoopTesterApp.jar `find . -name \*.class`
