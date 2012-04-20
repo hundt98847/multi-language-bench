@@ -17,6 +17,12 @@
 #    - set the path to the C++ sources
 #
 #    - you need llvm-3.0 or later
+#
+# IMPORTANT:
+# This version only includes the sources from the C++ version.
+# However, the dimensions of the C++ version are too large for v8. To
+# actually run the generated JS, the C++ benchmark needs to be reduced
+# in size (e.g., change inner loop from 100 to 2).
 
 #===============================================================
 # Environment
