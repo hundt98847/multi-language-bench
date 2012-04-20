@@ -111,7 +111,7 @@ class LoopTesterApp {
       app.buildConnect(2, n + 1);
       n = n + 1;
 
-      for (int i = 0; i < 2; i++) {
+      for (int i = 0; i < 100; i++) {
         int top = n;
         n = app.buildStraight(n, 1);
         for (int j = 0; j < 25; j++) {
@@ -130,8 +130,8 @@ class LoopTesterApp {
     finder.findLoops();
     app.getMem();
 
-    System.out.println("Another 100 iterations...");
-    for (int i = 0; i < 100; i++) {
+    System.out.println("Another 50 iterations...");
+    for (int i = 0; i < 50; i++) {
       System.out.format(".");
       HavlakLoopFinder finder2 = new HavlakLoopFinder(app.cfg, new LSG());
       finder2.findLoops();
