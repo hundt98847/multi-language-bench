@@ -17,7 +17,7 @@
 # also a single method to run the benchmark.
 #
 #
-# Also - this version only includes the sources from the C++ version.
+# This version only includes the sources from the C++ version.
 # However, the dimensions of the C++ version are too large. To
 # actually run the generated JS, the C++ benchmark needs to be reduced
 # in size.
