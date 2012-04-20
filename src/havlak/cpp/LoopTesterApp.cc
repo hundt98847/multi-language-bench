@@ -58,11 +58,6 @@ int buildBaseLoop(MaoCFG *cfg, int from) {
   return footer;
 }
 
-extern "C" {
-int llvm_expect_i64(int m, int n) {
-  return m==n;
-}
-}
 
 int main(int argc, char *argv[]) {
   fprintf(stderr, "Welcome to LoopTesterApp, C++ edition\n");
@@ -92,7 +87,7 @@ int main(int argc, char *argv[]) {
     buildConnect(&cfg, 2, n + 1);
     n = n + 1;
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 100; i++) {
       int top = n;
       n = buildStraight(&cfg, n, 1);
       for (int j = 0; j < 25; j++) {
@@ -108,10 +103,11 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "Performing Loop Recognition\n1 Iteration\n");
   int num_loops = FindHavlakLoops(&cfg, &lsg);
 
-  fprintf(stderr, "Another 100 iterations...\n");
+  fprintf(stderr, "Another 50 iterations...\n");
   int sum = 0;
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 50; i++) {
     LoopStructureGraph lsg;
+    fprintf(stderr, ".");
     sum += FindHavlakLoops(&cfg, &lsg);
   }
   fprintf(stderr,
