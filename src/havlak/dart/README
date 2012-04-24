@@ -19,3 +19,26 @@ Javascript to work on the various JS VM's. Specifically, at the very bottom
 of the sources, there is a 3 deep loop nest. The dimensions of these
 3 loops are different from the C++ baseline. 
 
+
+How to Generate JavaScript
+--------------------------------
+
+I've used the Frog compiler successfully to generate JS out of the Dart
+sources, using these steps:
+
+1) Build Dart. cd into the frog directory, e.g.:
+   cd ~/projects/dart/frog
+
+2) Invoce the compiler on the dart sources, e.g.:
+   ./frogc ~/multi-language-bench-2/trunk/src/havlak/dart/LoopTesterApp.dart 
+
+3) The generated JS file will be in the same directory ad the 
+   corresponding dart file.
+
+Sometimes the generated JS sources fail when run in d8. This almost always
+happens because of stack overflow. Remedy is to reduce the size
+of the benchmark further by reducing the loop boundaries at the end
+of the benchmark sources - or run it a couple of more times. The benchmark
+size apparently is right at the edge of what can be handled by d8.
+
+
