@@ -1,0 +1,46 @@
+#
+# This Makefile was provided by Brad Chen.
+#
+# It builds this benchmark with pepper 20, and it allows
+# to properly compare a plain linux binary, and the nacl binary
+# without having to load/validate anything in the browser.
+# It also uses the original sources (might have to be copied 
+# or pointed to in this Makefile), which also helps reduce
+# some potential confusion.
+#
+# This approach, comparing a NaCl vs Linux binary,
+# also allow for a more apples to apples comparison
+# of the generated code quality.
+#
+NACL_SDK_ROOT=~/lproj/nacl_sdk/pepper_20
+GXX=$(NACL_SDK_ROOT)/toolchain/linux_x86_glibc/x86_64-nacl/bin/g++
+IRT32=$(NACL_SDK_ROOT)/tools/irt_core_x86_32.nexe
+IRT64=$(NACL_SDK_ROOT)/tools/irt_core_x86_64.nexe
+SEL_LDR32=$(NACL_SDK_ROOT)/tools/sel_ldr_x86_32 -a -B $(IRT32)
+SEL_LDR64=$(NACL_SDK_ROOT)/tools/sel_ldr_x86_64 -a -B $(IRT64)
+LINUX_GXX=g++
+
+havlak_64.nexe: mao-loops.cc LoopTesterApp.cc
+	$(GXX) -O2 -m64 --static mao-loops.cc LoopTesterApp.cc -lc -lstdc++ -o $@
+	strip $@
+	gzip -c $@ > $@.gz
+
+havlak_32.nexe: mao-loops.cc LoopTesterApp.cc
+	$(GXX) -O2 -m32 --static mao-loops.cc LoopTesterApp.cc -lc -lstdc++ -o $@
+	strip $@
+	gzip -c $@ > $@.gz
+
+a.out: mao-loops.cc LoopTesterApp.cc
+	$(LINUX_GXX) -O2 -m64 --static -o $@ mao-loops.cc LoopTesterApp.cc
+	strip $@
+	gzip -c $@ > $@.gz
+
+test: havlak_32.nexe havlak_64.nexe a.out
+	/usr/bin/time $(SEL_LDR32) havlak_32.nexe
+	/usr/bin/time $(SEL_LDR64) havlak_64.nexe	
+	/usr/bin/time ./a.out
+	size havlak_32.nexe havlak_64.nexe a.out
+	ls -l *.gz
+
+clean:
+	rm a.out *.nexe *.gz
